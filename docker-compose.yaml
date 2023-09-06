@@ -6,3 +6,11 @@ services:
     build: ./service-registry
     ports:
       - "8761:8761"
+  
+  config_server:
+    container_name: config-server
+    build: ./config-server
+    ports:
+      - "8088:8088"
+    depends_on:
+      - service_registry
