@@ -20,3 +20,26 @@ services:
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
+
+  db:
+    container_name: database
+    image: postgres:15
+    environment:
+      POSTGRES_DB: moviedb
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+      - db:/data/postgres
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5332:5432"
+    networks:
+      - db
+
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db:
