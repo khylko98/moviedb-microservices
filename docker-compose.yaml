@@ -37,6 +37,18 @@ services:
     networks:
       - db
 
+  api_gateway:
+    container_name: api-gateway
+    build: ./api-gateway
+    ports:
+      - "8060:8060"
+    environment:
+      - eureka.client.service-url.defaultZone=http://service-registry:8761/eureka
+    depends_on:
+      - service_registry
+      - config_server
+      - zipkin
+
 networks:
   db:
     driver: bridge
