@@ -73,7 +73,7 @@ Alternatively, you can use Docker Compose to run all services together:
 2. Run the following command:
 
 ```shell
-docker-compose up
+docker compose up
 ```
 
 This will start all services in Docker containers.
