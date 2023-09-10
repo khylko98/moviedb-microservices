@@ -50,7 +50,7 @@
 	</dependencyManagement>
 
 	<build>
-		<finalName>service_registry</finalName>
+		<finalName>service-registry</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

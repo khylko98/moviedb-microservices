@@ -18,7 +18,7 @@ import java.util.Map;
 @EnableKafka
 public class KafkaProducerConfig {
 
-    private static final String HOST = "localhost:9092";
+    private static final String HOST = "kafka:29092";
 
     @Bean
     public ProducerFactory<String, User> producerFactory() {

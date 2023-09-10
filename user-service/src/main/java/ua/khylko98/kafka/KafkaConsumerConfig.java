@@ -18,7 +18,7 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConsumerConfig {
 
-    private static final String HOST = "localhost:9092";
+    private static final String HOST = "kafka:29092";
     private static final String TOPIC_GROUP = "movie-consumer-group";
 
     @Bean

@@ -1,28 +1,16 @@
 version: '3'
 
 services:
-  service_registry:
-    container_name: service-registry
-    build: ./service-registry
-    ports:
-      - "8761:8761"
-  
-  config_server:
-    container_name: config-server
-    build: ./config-server
-    ports:
-      - "8088:8088"
-    depends_on:
-      - service_registry
-
   zipkin:
     container_name: zipkin
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
-
+    networks:
+      - db
+  
   db:
-    container_name: database
+    container_name: db
     image: postgres:15
     environment:
       POSTGRES_DB: moviedb
@@ -36,34 +24,20 @@ services:
       - "5332:5432"
     networks:
       - db
-
-  api_gateway:
-    container_name: api-gateway
-    build: ./api-gateway
-    ports:
-      - "8060:8060"
-    environment:
-      - eureka.client.service-url.defaultZone=http://service-registry:8761/eureka
-    depends_on:
-      - service_registry
-      - config_server
-      - zipkin
   
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
-    ports:
-      - "2181:2181"
+    image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: kafka
     ports:
-      - "9092:9092"
-    expose:
-      - '29092'
+      - "2181:2181"
+    networks:
+      - db
+  
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:latest
     environment:
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
@@ -71,13 +45,21 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
       KAFKA_MIN_INSYNC_REPLICAS: '1'
+    ports:
+      - "9092:9092"
+    expose:
+      - '29092'
     depends_on:
       - zookeeper
-
+    networks:
+      - db
+  
   init-kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - kafka
+    networks:
+      - db
     entrypoint: [ '/bin/sh', '-c' ]
     command: |
       "
@@ -92,6 +74,72 @@ services:
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server kafka:29092 --list
       "
+  
+  service-registry:
+    container_name: service-registry
+    build: ./service-registry
+    ports:
+      - "8761:8761"
+    networks:
+      - db
+    restart: on-failure
+  
+  config-server:
+    container_name: config-server
+    build: ./config-server
+    ports:
+      - "8088:8088"
+    depends_on:
+      - service-registry
+    networks:
+      - db
+    restart: on-failure
+  
+  api-gateway:
+    container_name: api-gateway
+    build: ./api-gateway
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+    ports:
+      - "8060:8060"
+    depends_on:
+      - config-server
+      - zipkin
+    networks:
+      - db
+    restart: on-failure
+  
+  user-service:
+    container_name: user-service
+    build: ./user-service
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+    ports:
+      - "8081:8081"
+    depends_on:
+      - config-server
+      - zipkin
+      - init-kafka
+      - db
+    networks:
+      - db
+    restart: on-failure
+  
+  movie-service:
+    container_name: movie-service
+    build: ./movie-service
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+    ports:
+      - "8082:8082"
+    depends_on:
+      - config-server
+      - zipkin
+      - init-kafka
+      - db
+    networks:
+      - db
+    restart: on-failure
 
 networks:
   db:

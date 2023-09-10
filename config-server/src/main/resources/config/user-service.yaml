@@ -6,7 +6,7 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://service-registry:8761/eureka/
 
 management:
   tracing:
@@ -25,9 +25,9 @@ cors:
 
 spring:
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:29092
   datasource:
-    url: jdbc:postgresql://localhost:5332/moviedb
+    url: jdbc:postgresql://db:5432/moviedb
     username: username
     password: password
     jpa:
