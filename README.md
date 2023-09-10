@@ -29,7 +29,7 @@ mvn package
 
 ```shell
 cd service-registry
-mvn spring-boot:run
+mvn package
 cd ..
 ```
 
@@ -37,7 +37,7 @@ cd ..
 
 ```shell
 cd config-server
-mvn spring-boot:run
+mvn package
 cd ..
 ```
 
@@ -45,7 +45,7 @@ cd ..
 
 ```shell
 cd api-gateway
-mvn spring-boot:run
+mvn package
 cd ..
 ```
 
@@ -53,7 +53,7 @@ cd ..
 
 ```shell
 cd user-service
-mvn spring-boot:run
+mvn package
 cd ..
 ```
 
@@ -61,7 +61,7 @@ cd ..
 
 ```shell
 cd movie-service
-mvn spring-boot:run
+mvn package
 cd ..
 ```
 
